@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rule;
 class UpdateContactRequest extends FormRequest
 {
     /**
@@ -23,7 +23,7 @@ class UpdateContactRequest extends FormRequest
     {
         return [
         'name' => 'required|string|max:255',
-        'email' => 'required|email|max:255',
+        'email' => ['required','email',Rule::unique('contacts')->ignore($this->contact)->where(function($query){return $query->where('user_id',auth()->id());})],
         'phone_number' => 'nullable|string|max:20',
         
     ];

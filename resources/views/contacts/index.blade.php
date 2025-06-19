@@ -48,8 +48,7 @@
                     </tr>
                 @endforeach
             </tbody>
-        @else
-            <div>no contacts yet</div>
+        
 
         @endif
 

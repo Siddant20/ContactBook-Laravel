@@ -14,9 +14,9 @@ class ContactController extends Controller
     public function index(Request $request)
 
     {
-        $sort=$request->get('sort','name');
-        $direction=$request->get('direction','asc');   
-        $contacts= Contact::orderBy($sort,$direction)->paginate(10);
+        $sort = $request->get('sort','name');
+        $direction = $request->get('direction','asc');
+        $contacts= Contact::where('user_id',auth()->id())->orderBy($sort,$direction)->paginate(10);
         return view('contacts.index', compact('contacts'));
     }
 
@@ -36,7 +36,8 @@ class ContactController extends Controller
     {
 
             // dd($request);
-            Contact::create($request->validated());
+            
+            Contact::create(array_merge($request->validated(),['user_id'=>$request->user()->id]));
             
             return redirect()->route('contacts.index')->with('success','Conctact created successfully');
     }   
@@ -63,6 +64,7 @@ class ContactController extends Controller
      */
     public function update(UpdateContactRequest $request, Contact $contact)
     { 
+
         
         
         $contact->update($request->validated());
