@@ -1,6 +1,7 @@
 <x-layouts.app>
     <h1 class="text-xl font-bold mb-4">EDIT Contact</h1>
-    <form method="POST" action="{{ route('contacts.update', $contact) }}"
+    <div class="max-w-md mx-auto mt-10 bg-white p-6 rounded shadow">
+    <form class="mt-8" method="POST" action="{{ route('contacts.update', $contact) }}"
         class="max-w-md mx-auto p-6 bg-white rounded shadow-md">
         @csrf
         @method('PUT')
@@ -45,4 +46,5 @@
             Submit
         </button>
     </form>
+    </div>
 </x-layouts.app>

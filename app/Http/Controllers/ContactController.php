@@ -5,6 +5,7 @@ use App\Http\Requests\StoreContactRequest;
 use App\Http\Requests\UpdateContactRequest;
 use App\Models\Contact;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class ContactController extends Controller
 {
@@ -25,6 +26,9 @@ class ContactController extends Controller
      */
     public function create()
     {
+         if (! Gate::allows('create-contact')){
+                abort(403);
+            }
         return view('contacts.create');
     }
 
@@ -36,10 +40,12 @@ class ContactController extends Controller
     {
 
             // dd($request);
-            
+            if (! Gate::allows('create-contact')){
+                abort(403);
+            }
             Contact::create(array_merge($request->validated(),['user_id'=>$request->user()->id]));
             
-            return redirect()->route('contacts.index')->with('success','Conctact created successfully');
+            return redirect()->route('contacts.index')->with('success','Contact created successfully');
     }   
 
     /**
@@ -47,6 +53,10 @@ class ContactController extends Controller
      */
     public function show(Contact $contact)
     {
+        if (! Gate::allows('view-contact', $contact)){
+            abort(403);
+            
+        }
         return view('contacts.show', compact('contact'));
     }
 
@@ -55,6 +65,9 @@ class ContactController extends Controller
      */
     public function edit(Contact $contact)
     {
+        if (!Gate::allows('update-contact', $contact)){
+            abort(403);
+        }
         return view('contacts.edit', compact('contact'));
         
     }
@@ -65,7 +78,10 @@ class ContactController extends Controller
     public function update(UpdateContactRequest $request, Contact $contact)
     { 
 
-        
+        if (! Gate::allows('update-contact', $contact)) {
+            abort(403);
+            
+        }
         
         $contact->update($request->validated());
 
@@ -78,6 +94,9 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
+        if (!Gate::allows('delete-contact', $contact)){
+            abort(403);
+        }
         $contact->delete();
         return redirect()->route('contacts.index')->with('success','deleted');
     }
