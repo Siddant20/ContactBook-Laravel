@@ -12,11 +12,12 @@
     <h1 class="text-4xl text-blue-600 font-bold text-center mt-10">All Contacts</h1>
 
 
-    <form method="GET" action="{{ route('contacts.index') }}"><input type="text" name="search"
+    <form method="GET" action="{{ route('contacts.index') }}"><input type="text"  name="search"
             placeholder="Search Contacts "><button type="submit">🔍</button> <button onclick="location.reload()"
             style="font-size: 15px; padding: 12px 24px;">
             🔄 Refresh
         </button></form>
+        
     
 
 

@@ -13,10 +13,34 @@ class AdminController extends Controller
     {
        $sort=$request->get('sort','name');
        $direction=$request->get('direction','asc');
-       $admins=User::role('admin')->orderBy($sort,$direction)->get();
-       $nonAdmins=User::role('user')->orderBy($sort,$direction)->get();
+       $searchAdmin=$request->get('searchAdmin');
+       $searchUser=$request->get('searchUser');
 
-       return view('admin.index',compact('admins','nonAdmins'));
+       $admins=User::role('admin')
+       ->when($searchAdmin, function($query, $searchAdmin){
+        $query->where(function($q) use ($searchAdmin)
+        {           
+            $q->where('name','like',"%{$searchAdmin}%")
+            ->orWhere('email','like',"%{$searchAdmin}%");
+        }
+        );
+       })
+       
+       
+       ->orderBy($sort,$direction)->paginate(5);
+       
+       $nonAdmins=User::role('user')
+       ->when($searchUser, function($query, $searchUser){
+        $query->where(function($q) use ($searchUser)
+        {   
+            $q->where('name','like',"%$searchUser%")
+              ->orWhere('email','like',"%$searchUser%");
+        });
+       })
+       
+       ->orderBy($sort,$direction)->paginate(5);
+
+       return view('admin.index',compact('admins','nonAdmins', 'searchAdmin', 'searchUser'));
  
     }
 
