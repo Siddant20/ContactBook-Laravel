@@ -20,22 +20,20 @@
 
             <flux:spacer />
                 <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
+                <flux:navlist.group  class="grid">
+                    
                 </flux:navlist.group>
             </flux:navlist>
 
-            {{-- <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
+            <div class="p-4 border-t border-gray-200 text-sm text-gray-700">
+        @role('admin')
+        <p>👑 You are logged in as  <a href="{{ route('admin.index') }}" class='hover:underline'><strong>Admin</strong></a></p>
+    @else
+        <p>👤 You are logged in as <strong>User</strong></p>
+    @endrole 
+</div>
 
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
-            </flux:navlist> --}}
-
-            <!-- Desktop User Menu -->
+           
             <flux:dropdown class="hidden lg:block" position="bottom" align="start">
                 <flux:profile
                     :name="auth()->user()->name"

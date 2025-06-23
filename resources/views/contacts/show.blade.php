@@ -5,12 +5,23 @@
     </form>
     </form>
 
+    @can('viewAdminPanel')
+     <div class="mt-6 mb-6">
+        <a href="{{ route('admin.index') }}" 
+           class="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+           Admin Panel
+        </a>
+    </div>
+    @endcan
+
     <div style="margin-top: 30px" class="bg-white p-4 rounded shadow">
         <p><strong>Name:</strong> {{ $contact->name }}</p>
         <p><strong>Email:</strong> {{ $contact->email }}</p>
         <p><strong>Phone:</strong> {{ $contact->phone_number }}</p>
         <p><strong>Address:</strong> {{ $contact->address }}</p>
+        @role('admin')
         <p><strong>Belongs to: {{ $contact->user->name }}</strong></p>
+        @endrole
 
         <p class="text-sm text-gray-500 mt-2">
             Created at: {{ $contact->created_at->format('M d, Y H:i') }} <br>
@@ -20,7 +31,7 @@
     <br />
     <div>
         <form method="POST" onsubmit="return confirm('Are you sure?');"
-            action="{{ route('contacts.destroy', $contact) }}">
+            action="{{ route('contacts.destroy', $contact->id) }}">
             <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition">Delete
                 record</button>
             @csrf

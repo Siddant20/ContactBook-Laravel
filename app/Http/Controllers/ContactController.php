@@ -1,23 +1,44 @@
 <?php
 
 namespace App\Http\Controllers;
+
 use App\Http\Requests\StoreContactRequest;
 use App\Http\Requests\UpdateContactRequest;
 use App\Models\Contact;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
+
 
 class ContactController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
 
+    use AuthorizesRequests;
+    public function index(Request $request)
     {
-        $sort = $request->get('sort','name');
-        $direction = $request->get('direction','asc');
-        $contacts= Contact::where('user_id',auth()->id())->orderBy($sort,$direction)->paginate(10);
+        $this->authorize('viewAny', Contact::class);
+
+        $sort = $request->get('sort', 'name');
+        $direction = $request->get('direction', 'asc');
+        $search = $request->get('search');
+
+        $user= auth()->user();
+
+        $contacts = Contact::query()->when(! $user->hasRole('admin'), function ($query) use ($user) {
+        $query->where('user_id', $user->id);
+    })
+            ->when($search, function ($query, $search) {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone_number', 'like', "%{$search}%");
+                });
+            })
+            ->orderBy($sort, $direction)
+            ->paginate(10);
+
         return view('contacts.index', compact('contacts'));
     }
 
@@ -26,9 +47,8 @@ class ContactController extends Controller
      */
     public function create()
     {
-         if (! Gate::allows('create-contact')){
-                abort(403);
-            }
+        $this->authorize('create', Contact::class);
+
         return view('contacts.create');
     }
 
@@ -36,27 +56,21 @@ class ContactController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(StoreContactRequest $request)
-      
     {
+        $this->authorize('create', Contact::class);
 
-            // dd($request);
-            if (! Gate::allows('create-contact')){
-                abort(403);
-            }
-            Contact::create(array_merge($request->validated(),['user_id'=>$request->user()->id]));
-            
-            return redirect()->route('contacts.index')->with('success','Contact created successfully');
-    }   
+        $request->user()->contacts()->create($request->validated());
+
+        return redirect()->route('contacts.index')->with('success', 'Contact created successfully');
+    }
 
     /**
      * Display the specified resource.
      */
     public function show(Contact $contact)
     {
-        if (! Gate::allows('view-contact', $contact)){
-            abort(403);
-            
-        }
+        $this->authorize('view', $contact);
+
         return view('contacts.show', compact('contact'));
     }
 
@@ -65,28 +79,21 @@ class ContactController extends Controller
      */
     public function edit(Contact $contact)
     {
-        if (!Gate::allows('update-contact', $contact)){
-            abort(403);
-        }
+        $this->authorize('update', $contact);
+
         return view('contacts.edit', compact('contact'));
-        
     }
 
     /**
      * Update the specified resource in storage.
      */
     public function update(UpdateContactRequest $request, Contact $contact)
-    { 
+    {
+        $this->authorize('update', $contact);
 
-        if (! Gate::allows('update-contact', $contact)) {
-            abort(403);
-            
-        }
-        
         $contact->update($request->validated());
 
-        return redirect()->route('contacts.index')->with('success','updated successfully');
-        
+        return redirect()->route('contacts.index')->with('success', 'Contact updated successfully');
     }
 
     /**
@@ -94,10 +101,11 @@ class ContactController extends Controller
      */
     public function destroy(Contact $contact)
     {
-        if (!Gate::allows('delete-contact', $contact)){
-            abort(403);
-        }
+        $this->authorize('delete', $contact);
+
         $contact->delete();
-        return redirect()->route('contacts.index')->with('success','deleted');
+
+        return redirect()->route('contacts.index')->with('success', 'Contact deleted');
     }
+   
 }
